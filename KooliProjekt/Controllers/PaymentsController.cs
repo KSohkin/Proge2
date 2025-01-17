@@ -19,9 +19,9 @@ namespace KooliProjekt.Controllers
         }
 
         // GET: Payments
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int page = 1)
         {
-            return View(await _context.Payments.ToListAsync());
+            return View(await _context.Payments.GetPagedAsync(page, 5));
         }
 
         // GET: Payments/Details/5
