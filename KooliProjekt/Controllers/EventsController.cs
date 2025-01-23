@@ -6,22 +6,24 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using KooliProjekt.Data;
+using KooliProjekt.Services;
+
 
 namespace KooliProjekt.Controllers
 {
     public class EventsController : Controller
     {
-        private readonly ApplicationDbContext _context;
+        private readonly IEventsService _event;
 
-        public EventsController(ApplicationDbContext context)
+        public EventsController(IEventsService events)
         {
-            _context = context;
+            _event = events;
         }
 
         // GET: Events
         public async Task<IActionResult> Index(int page = 1)
         {
-            return View(await _context.Events.GetPagedAsync(page, 5));
+            return View(await _event.List(page, 5));
         }
 
         // GET: Events/Details/5
@@ -32,8 +34,7 @@ namespace KooliProjekt.Controllers
                 return NotFound();
             }
 
-            var @event = await _context.Events
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var @event = await _event.Get(id);
             if (@event == null)
             {
                 return NotFound();
@@ -57,8 +58,7 @@ namespace KooliProjekt.Controllers
         {
             if (ModelState.IsValid)
             {
-                _context.Add(@event);
-                await _context.SaveChangesAsync();
+                await _event.Save(@event);
                 return RedirectToAction(nameof(Index));
             }
             return View(@event);
@@ -72,7 +72,7 @@ namespace KooliProjekt.Controllers
                 return NotFound();
             }
 
-            var @event = await _context.Events.FindAsync(id);
+            var @event = await _event.Get(id);
             if (@event == null)
             {
                 return NotFound();
@@ -96,8 +96,7 @@ namespace KooliProjekt.Controllers
             {
                 try
                 {
-                    _context.Update(@event);
-                    await _context.SaveChangesAsync();
+                    await _event.Save(@event);
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -123,8 +122,7 @@ namespace KooliProjekt.Controllers
                 return NotFound();
             }
 
-            var @event = await _context.Events
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var @event = await _event.Get(id);
             if (@event == null)
             {
                 return NotFound();
@@ -138,19 +136,18 @@ namespace KooliProjekt.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var @event = await _context.Events.FindAsync(id);
+            var @event = await _event.Get(id);
             if (@event != null)
             {
-                _context.Events.Remove(@event);
+                await _event.Delete(id);
             }
 
-            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
         private bool EventExists(int id)
         {
-            return _context.Events.Any(e => e.Id == id);
+            return _event.Get(id) != null;
         }
     }
 }
