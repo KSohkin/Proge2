@@ -13,17 +13,17 @@ namespace KooliProjekt.Controllers
 {
     public class RegisteringsController : Controller
     {
-        private readonly ApplicationDbContext _context;
+        private readonly IRegisteringService _registering;
 
-        public RegisteringsController(ApplicationDbContext context)
+        public RegisteringsController(IRegisteringService registering)
         {
-            _context = context;
+            _registering = registering;
         }
 
         // GET: Registerings
         public async Task<IActionResult> Index(int page = 1)
         {
-            return View(await _context.Registerings.GetPagedAsync(page, 5));
+            return View(await _registering.List(page, 5));
         }
 
         // GET: Registerings/Details/5
@@ -34,8 +34,7 @@ namespace KooliProjekt.Controllers
                 return NotFound();
             }
 
-            var registering = await _context.Registerings
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var registering = await _registering.Get(id);
             if (registering == null)
             {
                 return NotFound();
@@ -59,8 +58,7 @@ namespace KooliProjekt.Controllers
         {
             if (ModelState.IsValid)
             {
-                _context.Add(registering);
-                await _context.SaveChangesAsync();
+                await _registering.Save(registering);
                 return RedirectToAction(nameof(Index));
             }
             return View(registering);
@@ -74,7 +72,7 @@ namespace KooliProjekt.Controllers
                 return NotFound();
             }
 
-            var registering = await _context.Registerings.FindAsync(id);
+            var registering = await _registering.Get(id);
             if (registering == null)
             {
                 return NotFound();
@@ -98,8 +96,7 @@ namespace KooliProjekt.Controllers
             {
                 try
                 {
-                    _context.Update(registering);
-                    await _context.SaveChangesAsync();
+                    await _registering.Save(registering);
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -125,8 +122,7 @@ namespace KooliProjekt.Controllers
                 return NotFound();
             }
 
-            var registering = await _context.Registerings
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var registering = await _registering.Get(id);
             if (registering == null)
             {
                 return NotFound();
@@ -140,19 +136,18 @@ namespace KooliProjekt.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var registering = await _context.Registerings.FindAsync(id);
+            var registering = await _registering.Get(id);
             if (registering != null)
             {
-                _context.Registerings.Remove(registering);
+               await _registering.Delete(id);
             }
 
-            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
         private bool RegisteringExists(int id)
         {
-            return _context.Registerings.Any(e => e.Id == id);
+            return _registering.Get(id) != null;
         }
     }
 }

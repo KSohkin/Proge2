@@ -17,7 +17,7 @@ namespace KooliProjekt.Services
             return await _context.Payments.GetPagedAsync(page, 5);
         }
 
-        public async Task<Payment> Get(int id)
+        public async Task<Payment> Get(int? id)
         {
             return await _context.Payments.FirstOrDefaultAsync(m => m.Id == id);
         }

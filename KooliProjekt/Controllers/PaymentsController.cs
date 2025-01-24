@@ -13,17 +13,17 @@ namespace KooliProjekt.Controllers
 {
     public class PaymentsController : Controller
     {
-        private readonly ApplicationDbContext _context;
+        private readonly IPaymentService _payment;
 
-        public PaymentsController(ApplicationDbContext context)
+        public PaymentsController(IPaymentService payment)
         {
-            _context = context;
+            _payment = payment;
         }
 
         // GET: Payments
         public async Task<IActionResult> Index(int page = 1)
         {
-            return View(await _context.Payments.GetPagedAsync(page, 5));
+            return View(await _payment.List(page, 5));
         }
 
         // GET: Payments/Details/5
@@ -34,8 +34,7 @@ namespace KooliProjekt.Controllers
                 return NotFound();
             }
 
-            var payment = await _context.Payments
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var payment = await _payment.Get(id);
             if (payment == null)
             {
                 return NotFound();
@@ -59,8 +58,7 @@ namespace KooliProjekt.Controllers
         {
             if (ModelState.IsValid)
             {
-                _context.Add(payment);
-                await _context.SaveChangesAsync();
+                await _payment.Save(payment);
                 return RedirectToAction(nameof(Index));
             }
             return View(payment);
@@ -74,7 +72,7 @@ namespace KooliProjekt.Controllers
                 return NotFound();
             }
 
-            var payment = await _context.Payments.FindAsync(id);
+            var payment = await _payment.Get(id);
             if (payment == null)
             {
                 return NotFound();
@@ -98,8 +96,7 @@ namespace KooliProjekt.Controllers
             {
                 try
                 {
-                    _context.Update(payment);
-                    await _context.SaveChangesAsync();
+                    await _payment.Save(payment);
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -125,8 +122,7 @@ namespace KooliProjekt.Controllers
                 return NotFound();
             }
 
-            var payment = await _context.Payments
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var payment = await _payment.Get(id);
             if (payment == null)
             {
                 return NotFound();
@@ -140,19 +136,18 @@ namespace KooliProjekt.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var payment = await _context.Payments.FindAsync(id);
+            var payment = await _payment.Get(id);
             if (payment != null)
             {
-                _context.Payments.Remove(payment);
+                await _payment.Delete(id);
             }
 
-            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
         private bool PaymentExists(int id)
         {
-            return _context.Payments.Any(e => e.Id == id);
+            return _payment.Get(id) != null;
         }
     }
 }

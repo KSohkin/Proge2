@@ -17,7 +17,7 @@ namespace KooliProjekt.Services
             return await _context.Organizers.GetPagedAsync(page, 5);
         }
 
-        public async Task<Organizer> Get(int id)
+        public async Task<Organizer> Get(int? id)
         {
             return await _context.Organizers.FirstOrDefaultAsync(m => m.Id == id);
         }

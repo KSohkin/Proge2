@@ -17,7 +17,7 @@ namespace KooliProjekt.Services
             return await _context.Registerings.GetPagedAsync(page, 5);
         }
 
-        public async Task<Registering> Get(int id)
+        public async Task<Registering> Get(int? id)
         {
             return await _context.Registerings.FirstOrDefaultAsync(m => m.Id == id);
         }
