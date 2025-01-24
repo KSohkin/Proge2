@@ -3,10 +3,8 @@ using System.ComponentModel.DataAnnotations;
 
 namespace KooliProjekt.Data
 {
-    public class Client
+    public class Client : Entity
     {
-        [Required]
-        public int Id { get; set; }
         [Required]
         public string Name { get; set; }
         [Required]
