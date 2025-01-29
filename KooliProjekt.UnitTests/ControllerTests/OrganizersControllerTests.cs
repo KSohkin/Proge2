@@ -8,15 +8,15 @@ using Xunit;
 
 namespace KooliProjekt.UnitTests.ControllerTests
 {
-    public class RegisteringsControllerTests
+    public class OrganizersControllerTests
     {
-        private readonly Mock<IRegisteringService> _registeringServiceMock;
-        private readonly RegisteringsController _controller;
+        private readonly Mock<IOrganizerService> _organizerServiceMock;
+        private readonly OrganizersController _controller;
 
-        public RegisteringsControllerTests()
+        public OrganizersControllerTests()
         {
-            _registeringServiceMock = new Mock<IRegisteringService>();
-            _controller = new RegisteringsController(_registeringServiceMock.Object);
+            _organizerServiceMock = new Mock<IOrganizerService>();
+            _controller = new OrganizersController(_organizerServiceMock.Object);
         }
 
         [Fact]
@@ -24,12 +24,12 @@ namespace KooliProjekt.UnitTests.ControllerTests
         {
             // Arrange
             var page = 1;
-            var data = new List<Registering>
+            var data = new List<Organizer>
             {
-                new Registering { Id = 1, Payment_Id = "Test 1" },
-                new Registering { Id = 2, Payment_Id = "Test 2" }
+                new Organizer { Id = 1, Name = "Test 1" },
+                new Organizer { Id = 2, Name = "Test 2" }
             };
-            var pagedResult = new PagedResult<Registering>
+            var pagedResult = new PagedResult<Organizer>
             {
                 Results = data,
                 CurrentPage = 1,
@@ -37,7 +37,7 @@ namespace KooliProjekt.UnitTests.ControllerTests
                 PageSize = 5,
                 RowCount = 2
             };
-            _registeringServiceMock
+            _organizerServiceMock
                 .Setup(x => x.List(page, It.IsAny<int>()))
                 .ReturnsAsync(pagedResult);
 
@@ -71,8 +71,8 @@ namespace KooliProjekt.UnitTests.ControllerTests
         {
             // Arrange
             int id = 1;
-            var list = (Registering)null;
-            _registeringServiceMock
+            var list = (Organizer)null;
+            _organizerServiceMock
                 .Setup(x => x.Get(id))
                 .ReturnsAsync(list);
 
@@ -88,8 +88,8 @@ namespace KooliProjekt.UnitTests.ControllerTests
         {
             // Arrange
             int id = 1;
-            var list = new Registering { Id = id };
-            _registeringServiceMock
+            var list = new Organizer { Id = id };
+            _organizerServiceMock
                 .Setup(x => x.Get(id))
                 .ReturnsAsync(list);
 
@@ -137,8 +137,8 @@ namespace KooliProjekt.UnitTests.ControllerTests
         {
             // Arrange
             int id = 1;
-            var list = (Registering)null;
-            _registeringServiceMock
+            var list = (Organizer)null;
+            _organizerServiceMock
                 .Setup(x => x.Get(id))
                 .ReturnsAsync(list);
 
@@ -154,8 +154,8 @@ namespace KooliProjekt.UnitTests.ControllerTests
         {
             // Arrange
             int id = 1;
-            var list = new Registering { Id = id };
-            _registeringServiceMock
+            var list = new Organizer { Id = id };
+            _organizerServiceMock
                 .Setup(x => x.Get(id))
                 .ReturnsAsync(list);
 
@@ -189,8 +189,8 @@ namespace KooliProjekt.UnitTests.ControllerTests
         {
             // Arrange
             int id = 1;
-            var list = (Registering)null;
-            _registeringServiceMock
+            var list = (Organizer)null;
+            _organizerServiceMock
                 .Setup(x => x.Get(id))
                 .ReturnsAsync(list);
 
@@ -206,8 +206,8 @@ namespace KooliProjekt.UnitTests.ControllerTests
         {
             // Arrange
             int id = 1;
-            var list = new Registering { Id = id };
-            _registeringServiceMock
+            var list = new Organizer { Id = id };
+            _organizerServiceMock
                 .Setup(x => x.Get(id))
                 .ReturnsAsync(list);
 

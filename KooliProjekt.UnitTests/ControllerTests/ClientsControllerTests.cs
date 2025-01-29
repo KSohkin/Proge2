@@ -8,15 +8,15 @@ using Xunit;
 
 namespace KooliProjekt.UnitTests.ControllerTests
 {
-    public class TodoListsControllerTests
+    public class ClientsServiceTests
     {
-        private readonly Mock<ITodoListService> _todoListServiceMock;
-        private readonly TodoListsController _controller;
+        private readonly Mock<IClientService> _clientServiceMock;
+        private readonly ClientsController _controller;
 
-        public TodoListsControllerTests()
+        public ClientsServiceTests()
         {
-            _todoListServiceMock = new Mock<ITodoListService>();
-            _controller = new TodoListsController(_todoListServiceMock.Object);
+            _clientServiceMock = new Mock<IClientService>();
+            _controller = new ClientsController(_clientServiceMock.Object);
         }
 
         [Fact]
@@ -24,12 +24,12 @@ namespace KooliProjekt.UnitTests.ControllerTests
         {
             // Arrange
             var page = 1;
-            var data = new List<TodoList>
+            var data = new List<Client>
             {
-                new TodoList { Id = 1, Title = "Test 1" },
-                new TodoList { Id = 2, Title = "Test 2" }
+                new Client { Id = 1, Name = "Test 1" },
+                new Client { Id = 2, Name = "Test 2" }
             };
-            var pagedResult = new PagedResult<TodoList>
+            var pagedResult = new PagedResult<Client>
             {
                 Results = data,
                 CurrentPage = 1,
@@ -37,7 +37,7 @@ namespace KooliProjekt.UnitTests.ControllerTests
                 PageSize = 5,
                 RowCount = 2
             };
-            _todoListServiceMock
+            _clientServiceMock
                 .Setup(x => x.List(page, It.IsAny<int>()))
                 .ReturnsAsync(pagedResult);
 
@@ -71,10 +71,8 @@ namespace KooliProjekt.UnitTests.ControllerTests
         {
             // Arrange
             int id = 1;
-            var list = (TodoList)null;
-            _todoListServiceMock
-                .Setup(x => x.Get(id))
-                .ReturnsAsync(list);
+            var list = (Client)null;
+            _clientServiceMock.Setup(x => x.Get(id)).ReturnsAsync(list);
 
             // Act
             var result = await _controller.Details(id) as NotFoundResult;
@@ -88,8 +86,8 @@ namespace KooliProjekt.UnitTests.ControllerTests
         {
             // Arrange
             int id = 1;
-            var list = new TodoList { Id = id };
-            _todoListServiceMock
+            var list = new Client { Id = id };
+            _clientServiceMock
                 .Setup(x => x.Get(id))
                 .ReturnsAsync(list);
 
@@ -137,10 +135,8 @@ namespace KooliProjekt.UnitTests.ControllerTests
         {
             // Arrange
             int id = 1;
-            var list = (TodoList)null;
-            _todoListServiceMock
-                .Setup(x => x.Get(id))
-                .ReturnsAsync(list);
+            var list = (Client)null;
+            _clientServiceMock.Setup(x => x.Get(id)).ReturnsAsync(list);
 
             // Act
             var result = await _controller.Edit(id) as NotFoundResult;
@@ -154,10 +150,8 @@ namespace KooliProjekt.UnitTests.ControllerTests
         {
             // Arrange
             int id = 1;
-            var list = new TodoList { Id = id };
-            _todoListServiceMock
-                .Setup(x => x.Get(id))
-                .ReturnsAsync(list);
+            var list = new Client { Id = id };
+            _clientServiceMock.Setup(x => x.Get(id)).ReturnsAsync(list);
 
             // Act
             var result = await _controller.Edit(id) as ViewResult;
@@ -189,10 +183,8 @@ namespace KooliProjekt.UnitTests.ControllerTests
         {
             // Arrange
             int id = 1;
-            var list = (TodoList)null;
-            _todoListServiceMock
-                .Setup(x => x.Get(id))
-                .ReturnsAsync(list);
+            var list = (Client)null;
+            _clientServiceMock.Setup(x => x.Get(id)).ReturnsAsync(list);
 
             // Act
             var result = await _controller.Delete(id) as NotFoundResult;
@@ -206,10 +198,8 @@ namespace KooliProjekt.UnitTests.ControllerTests
         {
             // Arrange
             int id = 1;
-            var list = new TodoList { Id = id };
-            _todoListServiceMock
-                .Setup(x => x.Get(id))
-                .ReturnsAsync(list);
+            var list = new Client { Id = id };
+            _clientServiceMock.Setup(x => x.Get(id)).ReturnsAsync(list);
 
             // Act
             var result = await _controller.Delete(id) as ViewResult;
