@@ -101,7 +101,7 @@ namespace KooliProjekt.Controllers
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!ClientExists(client.Id))
+                    if (!(_client.Get(id) == null))
                     {
                         return NotFound();
                     }
@@ -146,9 +146,10 @@ namespace KooliProjekt.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        private bool ClientExists(int id)
+        public bool ClientExists(int id)
         {
             return _client.Get(id) != null;
         }
+
     }
 }

@@ -3,6 +3,7 @@ using KooliProjekt.Data;
 using KooliProjekt.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.EntityFrameworkCore;
 using Moq;
 using Xunit;
 
@@ -194,40 +195,220 @@ namespace KooliProjekt.UnitTests.ControllerTests
         }
 
         [Fact]
-        public async Task Delete_should_return_view_with_model_when_list_was_found()
+        public async Task Create_should_return_view_when_model_is_invalid()
         {
-            // Arrange
-            int id = 1;
-            var list = new Client { Id = id };
-            _clientServiceMock.Setup(x => x.Get(id)).ReturnsAsync(list);
+            var list = new Client { Id = 1 };
+            _controller.ModelState.AddModelError("Id", "Requiered");
 
-            // Act
-            var result = await _controller.Delete(id) as ViewResult;
+            var result = await _controller.Create(list) as ViewResult;
 
-            // Assert
+
             Assert.NotNull(result);
-            Assert.True(
-                string.IsNullOrEmpty(result.ViewName) ||
-                result.ViewName == "Delete"
-            );
             Assert.Equal(list, result.Model);
         }
 
+        [Fact]
+        public async Task Edit_should_save_and_redirect_when_model_is_valid()
+        {
+            var list = new Client { Id = 1, Email = "JohnDoe@gmail.com", Name = "John Doe", Phonenumber = "5122252"  };
 
-            [Fact]
-            public async Task DeleteConfirmed_should_delete_list()
-            {
-                // Arrange
-                int id = 1;
-            _clientServiceMock.Setup(x => x.Delete(id)).Verifiable();
-                _controller.ModelState.AddModelError("key", "error");
+            _clientServiceMock
+                .Setup(x => x.Save(It.IsAny<Client>()))
+                .Returns(Task.CompletedTask)
+                .Verifiable();
 
-                // Act
-                var result = await _controller.DeleteConfirmed(id) as RedirectToActionResult;
+            var result = await _controller.Edit(list.Id, list) as RedirectToActionResult;
 
-                // Assert
-                Assert.NotNull(result);
+            Assert.NotNull(result);
+            Assert.Equal("Index", result.ActionName);
             _clientServiceMock.VerifyAll();
-            }
-        }           
+        }
+
+        [Fact]
+        public async Task Edit_should_return_notfound_when_id_does_not_match_model_id()
+        {
+            var list = new Client { Id = 1 };
+            int id = 2;
+
+            _clientServiceMock
+                .Setup(x => x.Get(id))
+                .ReturnsAsync(list);
+
+            var result = await _controller.Edit(id, list) as NotFoundResult;
+
+            Assert.NotNull(result);
+        }
+
+        [Fact]
+        public async Task DeleteConfirmed_should_delete_and_redirect_when_valid_id()
+        {
+            int id = 1;
+            var list = new Client { Id = id, Name = "Jane Woe", Phonenumber = "5166215", Email = "JaneWoe@gmail.com"  };
+            _clientServiceMock.Setup(x => x.Get(id)).ReturnsAsync(list);
+
+            var result = await _controller.DeleteConfirmed(id) as RedirectToActionResult;
+
+            Assert.NotNull(result);
+            Assert.Equal("Index", result.ActionName);
+            _clientServiceMock.VerifyAll();
+
+        }
+
+        [Fact]
+        public async Task Create_ValidClient_ReturnsRedirectToAction()
+        {
+            // Arrange
+            var client = new Client { Id = 1, Name = "John Doe", Email = "john@example.com", Phonenumber = "1234567890" };
+            _clientServiceMock.Setup(service => service.Save(It.IsAny<Client>())).Returns(Task.CompletedTask);
+
+            // Act
+            var result = await _controller.Create(client);
+
+            // Assert
+            var redirectToActionResult = Assert.IsType<RedirectToActionResult>(result);
+            Assert.Equal("Index", redirectToActionResult.ActionName);
+            _clientServiceMock.Verify(service => service.Save(client), Times.Once);
+        }
+
+        [Fact]
+        public async Task Create_InvalidModelState_ReturnsViewWithClient()
+        {
+            // Arrange
+            var client = new Client { Id = 1, Name = "", Email = "invalid-email", Phonenumber = "1234567890" }; // Invalid data
+            _controller.ModelState.AddModelError("Name", "Name is required");
+
+            // Act
+            var result = await _controller.Create(client);
+
+            // Assert
+            var viewResult = Assert.IsType<ViewResult>(result);
+            Assert.Equal(client, viewResult.Model);
+            _clientServiceMock.Verify(service => service.Save(It.IsAny<Client>()), Times.Never);
+        }
+        [Fact]
+        public async Task Create_Valid_Client_ReturnsRedirectToAction()
+        {
+            // Arrange
+            var client = new Client { Id = 1, Name = "John Doe", Email = "john@example.com", Phonenumber = "1234567890" };
+            _clientServiceMock.Setup(service => service.Save(It.IsAny<Client>())).Returns(Task.CompletedTask);
+
+            // Act
+            var result = await _controller.Create(client);
+
+            // Assert
+            var redirectToActionResult = Assert.IsType<RedirectToActionResult>(result);
+            Assert.Equal("Index", redirectToActionResult.ActionName);
+            _clientServiceMock.Verify(service => service.Save(client), Times.Once);
+        }
+
+        [Fact]
+        public async Task Create_InvalidModel_State_ReturnsViewWithClient()
+        {
+            // Arrange
+            var client = new Client { Id = 1, Name = "", Email = "invalid-email", Phonenumber = "1234567890" }; // Invalid data
+            _controller.ModelState.AddModelError("Name", "Name is required");
+
+            // Act
+            var result = await _controller.Create(client);
+
+            // Assert
+            var viewResult = Assert.IsType<ViewResult>(result);
+            Assert.Equal(client, viewResult.Model);
+            _clientServiceMock.Verify(service => service.Save(It.IsAny<Client>()), Times.Never);
+        }
+
+    
+
+        [Fact]
+        public async Task Delete_ClientExists_ReturnsViewWithClient()
+        {
+            // Arrange
+            var client = new Client { Id = 1, Name = "John Doe" };
+            _clientServiceMock.Setup(service => service.Get(client.Id)).ReturnsAsync(client);
+
+            // Act
+            var result = await _controller.Delete(client.Id);
+
+            // Assert
+            var viewResult = Assert.IsType<ViewResult>(result);
+            Assert.Equal(client, viewResult.Model);
+        }
+
+        [Fact]
+        public async Task Delete_ClientDoesNotExist_ReturnsNotFound()
+        {
+            // Arrange
+            _clientServiceMock.Setup(service => service.Get(It.IsAny<int>())).ReturnsAsync((Client)null);
+
+            // Act
+            var result = await _controller.Delete(1);
+
+            // Assert
+            Assert.IsType<NotFoundResult>(result);
+        }
+
+        [Fact]
+        public async Task DeleteConfirmed_ClientExists_DeletesClientAndRedirects()
+        {
+            // Arrange
+            var client = new Client { Id = 1, Name = "John Doe" };
+            _clientServiceMock.Setup(service => service.Get(client.Id)).ReturnsAsync(client);
+            _clientServiceMock.Setup(service => service.Delete(client.Id)).Returns(Task.CompletedTask);
+
+            // Act
+            var result = await _controller.DeleteConfirmed(client.Id);
+
+            // Assert
+            var redirectToActionResult = Assert.IsType<RedirectToActionResult>(result);
+            Assert.Equal("Index", redirectToActionResult.ActionName);
+            _clientServiceMock.Verify(service => service.Delete(client.Id), Times.Once);
+        }
+
+        [Fact]
+        public async Task DeleteConfirmed_ClientDoesNotExist_RedirectsToIndex()
+        {
+            // Arrange
+            _clientServiceMock.Setup(service => service.Get(It.IsAny<int>())).ReturnsAsync((Client)null);
+
+            // Act
+            var result = await _controller.DeleteConfirmed(1);
+
+            // Assert
+            var redirectToActionResult = Assert.IsType<RedirectToActionResult>(result);
+            Assert.Equal("Index", redirectToActionResult.ActionName);
+        }
+
+        [Fact]
+        public async Task Create_should_return_notfound_when_exception()
+        {
+            // Arrange
+            int id = 1;
+            Client client = new Client { Id = id };
+            var exception = new DbUpdateConcurrencyException();
+            // Act
+
+            _clientServiceMock.Setup(x => x.Save(It.IsAny<Client>())).ThrowsAsync(exception).Verifiable();
+            _clientServiceMock.Setup(x => x.Get(It.IsAny<int>())).ReturnsAsync((Client)null).Verifiable();
+            var result = await _controller.Edit(id, client);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.IsType<NotFoundResult>(result);
+            _clientServiceMock.VerifyAll();
+        }
+
+        [Fact]
+        public async Task Create_should_throw_error_when_client_id_was_found()
+        {
+            // Arrange
+            int id = 1;
+            Client client = new Client { Id = id };
+            // Act
+            _clientServiceMock.Setup(x => x.Save(It.IsAny<Client>())).ThrowsAsync(new DbUpdateConcurrencyException()).Verifiable();
+            _clientServiceMock.Setup(x => x.Get(It.IsAny<int>())).ReturnsAsync((Client)null).Verifiable();
+            // Assert
+            await Assert.ThrowsAsync<DbUpdateConcurrencyException>(async () => await _controller.Edit(id, client));
+
+        }
     }
+}
