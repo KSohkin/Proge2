@@ -100,13 +100,14 @@ namespace KooliProjekt.Controllers
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!OrganizerExists(organizer.Id))
+                    var existingClient = await _organizer.Get(id);
+                    if (existingClient == null)
                     {
                         return NotFound();
                     }
                     else
                     {
-                        throw;
+                        throw; // This will now actually throw the exception
                     }
                 }
                 return RedirectToAction(nameof(Index));
@@ -145,9 +146,9 @@ namespace KooliProjekt.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        private bool OrganizerExists(int id)
+        public async Task<bool> ClientExists(int id)
         {
-            return _organizer.Get(id) != null;
+            return await _organizer.Get(id) != null;
         }
     }
 }

@@ -396,19 +396,89 @@ namespace KooliProjekt.UnitTests.ControllerTests
             Assert.IsType<NotFoundResult>(result);
             _clientServiceMock.VerifyAll();
         }
+        [Fact]
+        public async Task Edit_InvalidModelState_ReturnsView()
+        {
+            _controller.ModelState.AddModelError("Error", "Invalid");
+            var client = new Client();
+
+            var result = await _controller.Edit(client.Id, client);
+
+            var viewResult = Assert.IsType<ViewResult>(result);
+            Assert.Equal(client, viewResult.Model);
+        }
 
         [Fact]
-        public async Task Create_should_throw_error_when_client_id_was_found()
+        public async Task Edit_ConcurrencyException_ClientNotFound_ReturnsNotFound()
+        {
+            var client = new Client { Id = 1 };
+            _clientServiceMock.Setup(s => s.Save(client)).ThrowsAsync(new DbUpdateConcurrencyException());
+            _clientServiceMock.Setup(s => s.Get(client.Id)).ReturnsAsync((Client)null);
+
+            var result = await _controller.Edit(client.Id, client);
+
+            Assert.IsType<NotFoundResult>(result);
+        }
+
+        [Fact]
+        public async Task Edit_ConcurrencyException_ClientExists_ThrowsException()
+        {
+            var client = new Client { Id = 1 };
+
+            _clientServiceMock.Setup(s => s.Save(It.IsAny<Client>()))
+                .ThrowsAsync(new DbUpdateConcurrencyException());
+
+            _clientServiceMock.Setup(s => s.Get(client.Id))
+                .ReturnsAsync(client);
+
+            // Ensure Save is actually called
+            _clientServiceMock.Verify(s => s.Save(client), Times.Never);
+
+            var exception = await Assert.ThrowsAsync<DbUpdateConcurrencyException>(
+                () => _controller.Edit(client.Id, client)
+            );
+
+            Assert.NotNull(exception);
+        }
+
+
+        [Fact]
+        public async Task Edit_ValidClient_RedirectsToIndex()
+        {
+            var client = new Client { Id = 1 };
+            _clientServiceMock.Setup(s => s.Save(client)).Returns(Task.CompletedTask);
+
+            var result = await _controller.Edit(client.Id, client);
+
+            var redirectResult = Assert.IsType<RedirectToActionResult>(result);
+            Assert.Equal("Index", redirectResult.ActionName);
+
+        }
+        [Fact]
+        public async Task ClientExists_WhenClientExists_ReturnsTrue()
         {
             // Arrange
-            int id = 1;
-            Client client = new Client { Id = id };
-            // Act
-            _clientServiceMock.Setup(x => x.Save(It.IsAny<Client>())).ThrowsAsync(new DbUpdateConcurrencyException()).Verifiable();
-            _clientServiceMock.Setup(x => x.Get(It.IsAny<int>())).ReturnsAsync((Client)null).Verifiable();
-            // Assert
-            await Assert.ThrowsAsync<DbUpdateConcurrencyException>(async () => await _controller.Edit(id, client));
+            var client = new Client { Id = 1 };
+            _clientServiceMock.Setup(s => s.Get(client.Id)).ReturnsAsync(client);
 
+            // Act
+            var result = await _controller.ClientExists(client.Id);
+
+            // Assert
+            Assert.True(result);
+        }
+
+        [Fact]
+        public async Task ClientExists_WhenClientDoesNotExist_ReturnsFalse()
+        {
+            // Arrange
+            _clientServiceMock.Setup(s => s.Get(It.IsAny<int>())).ReturnsAsync((Client)null);
+
+            // Act
+            var result = await _controller.ClientExists(1);
+
+            // Assert
+            Assert.False(result);
         }
     }
 }

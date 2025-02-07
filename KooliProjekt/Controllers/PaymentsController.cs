@@ -100,13 +100,14 @@ namespace KooliProjekt.Controllers
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!PaymentExists(payment.Id))
+                    var existingClient = await _payment.Get(id);
+                    if (existingClient == null)
                     {
                         return NotFound();
                     }
                     else
                     {
-                        throw;
+                        throw; // This will now actually throw the exception
                     }
                 }
                 return RedirectToAction(nameof(Index));
@@ -145,9 +146,9 @@ namespace KooliProjekt.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        private bool PaymentExists(int id)
+        public async Task<bool> ClientExists(int id)
         {
-            return _payment.Get(id) != null;
+            return await _payment.Get(id) != null;
         }
     }
 }

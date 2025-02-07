@@ -101,13 +101,14 @@ namespace KooliProjekt.Controllers
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!(_client.Get(id) == null))
+                    var existingClient = await _client.Get(id);
+                    if (existingClient == null)
                     {
                         return NotFound();
                     }
                     else
                     {
-                        throw;
+                        throw; // This will now actually throw the exception
                     }
                 }
                 return RedirectToAction(nameof(Index));
@@ -146,10 +147,9 @@ namespace KooliProjekt.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        public bool ClientExists(int id)
+        public async Task<bool> ClientExists(int id)
         {
-            return _client.Get(id) != null;
+            return await _client.Get(id) != null;
         }
-
     }
 }
