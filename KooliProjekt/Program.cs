@@ -26,6 +26,12 @@ namespace KooliProjekt
             builder.Services.AddScoped<IOrganizerService, OrganizerService>();
             builder.Services.AddScoped<IPaymentService, PaymentService>();
             builder.Services.AddScoped<IRegisteringService, RegisteringService>();
+            builder.Services.AddScoped<IClientRepository, ClientRepository>();
+            builder.Services.AddScoped<IEventRepository, EventRepository>();
+            builder.Services.AddScoped<IOrganizerRepository, OrganizerRepository>();
+            builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
+            builder.Services.AddScoped<IRegisteringRepository, RegisteringRepository>();
+
 
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 

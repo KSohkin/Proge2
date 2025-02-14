@@ -1,49 +1,36 @@
 ﻿using KooliProjekt.Data;
+using KooliProjekt.Data.Repositories;
 using Microsoft.EntityFrameworkCore;
 
 namespace KooliProjekt.Services
 {
     public class ClientsService : IClientService
     {
-        private readonly ApplicationDbContext _context;
+        private readonly IUnitOfWork _uof;
 
-        public ClientsService(ApplicationDbContext context)
+        public ClientsService(IUnitOfWork uof)
         {
-            _context = context;
+            _uof = uof;
+        }
+
+        public async Task Delete(int Id)
+        {
+            await _uof.ClientRepository.Delete(Id);
+        }
+
+        public async Task<Client> Get(int? Id)
+        {
+            return await _uof.ClientRepository.Get((int)Id);
         }
 
         public async Task<PagedResult<Client>> List(int page, int pageSize)
         {
-            return await _context.Clients.GetPagedAsync(page, 5);
+            return await _uof.ClientRepository.List(page, pageSize);
         }
 
-        public async Task<Client> Get(int? id)
+        public async Task Save(Client client)
         {
-            return await _context.Clients.FirstOrDefaultAsync(m => m.Id == id);
-        }
-
-        public async Task Save(Client list)
-        {
-            if (list.Id == 0)
-            {
-                _context.Add(list);
-            }
-            else
-            {
-                _context.Update(list);
-            }
-
-            await _context.SaveChangesAsync();
-        }
-
-        public async Task Delete(int id)
-        {
-            var client = await _context.Events.FindAsync(id);
-            if (client != null)
-            {
-                _context.Events.Remove(client);
-                await _context.SaveChangesAsync();
-            }
+            await _uof.ClientRepository.Save(client);
         }
     }
 }

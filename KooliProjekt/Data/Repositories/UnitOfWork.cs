@@ -28,20 +28,5 @@
         public IOrganizerRepository OrganizerRepository { get; }
 
 
-
-        public async Task BeginTransaction()
-        {
-            await _context.Database.BeginTransactionAsync();
-        }
-
-        public async Task Commit()
-        {
-            await _context.Database.CommitTransactionAsync();
-        }
-
-        public async Task Rollback()
-        {
-            await _context.Database.RollbackTransactionAsync();
-        }
     }
 }

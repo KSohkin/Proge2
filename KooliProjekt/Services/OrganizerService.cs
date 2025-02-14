@@ -1,49 +1,36 @@
 ﻿using KooliProjekt.Data;
+using KooliProjekt.Data.Repositories;
 using Microsoft.EntityFrameworkCore;
 
 namespace KooliProjekt.Services
 {
     public class OrganizerService : IOrganizerService
     {
-        private readonly ApplicationDbContext _context;
+        private readonly IUnitOfWork _uof;
 
-        public OrganizerService(ApplicationDbContext context)
+        public OrganizerService(IUnitOfWork uof)
         {
-            _context = context;
+            _uof = uof;
+        }
+
+        public async Task Delete(int Id)
+        {
+            await _uof.OrganizerRepository.Delete(Id);
+        }
+
+        public async Task<Organizer> Get(int? Id)
+        {
+            return await _uof.OrganizerRepository.Get((int)Id);
         }
 
         public async Task<PagedResult<Organizer>> List(int page, int pageSize)
         {
-            return await _context.Organizers.GetPagedAsync(page, 5);
+            return await _uof.OrganizerRepository.List(page, pageSize);
         }
 
-        public async Task<Organizer> Get(int? id)
+        public async Task Save(Organizer organizer)
         {
-            return await _context.Organizers.FirstOrDefaultAsync(m => m.Id == id);
-        }
-
-        public async Task Save(Organizer list)
-        {
-            if (list.Id == 0)
-            {
-                _context.Add(list);
-            }
-            else
-            {
-                _context.Update(list);
-            }
-
-            await _context.SaveChangesAsync();
-        }
-
-        public async Task Delete(int id)
-        {
-            var Organizer = await _context.Events.FindAsync(id);
-            if (Organizer != null)
-            {
-                _context.Events.Remove(Organizer);
-                await _context.SaveChangesAsync();
-            }
+            await _uof.OrganizerRepository.Save(organizer);
         }
     }
 }
