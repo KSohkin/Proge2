@@ -2,7 +2,7 @@
 
 namespace KooliProjekt.Data
 {
-    public class Registering
+    public class Registering : Entity
     {
         [Required]
         public int Id { get; set; }

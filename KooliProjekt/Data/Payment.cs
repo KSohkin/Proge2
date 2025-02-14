@@ -2,7 +2,7 @@
 
 namespace KooliProjekt.Data
 {
-    public class Payment
+    public class Payment : Entity
     {
         [Required]
         public int Id { get; set; }

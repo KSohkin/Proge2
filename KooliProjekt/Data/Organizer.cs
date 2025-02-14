@@ -2,7 +2,7 @@
 
 namespace KooliProjekt.Data
 {
-    public class Organizer
+    public class Organizer : Entity
     {
         [Required]
         public int Id { get; set; }

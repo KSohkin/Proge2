@@ -2,7 +2,7 @@
 
 namespace KooliProjekt.Data
 {
-    public class Event
+    public class Event : Entity
     {
         [Required]
         public int Id { get; set; }
