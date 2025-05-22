@@ -38,10 +38,10 @@ namespace KooliProjekt.Services
 
         public async Task Delete(int id)
         {
-            var Registering = await _context.Events.FindAsync(id);
-            if (Registering != null)
+            var registering = await _context.Registerings.FindAsync(id);
+            if (registering != null)
             {
-                _context.Events.Remove(Registering);
+                _context.Registerings.Remove(registering);
                 await _context.SaveChangesAsync();
             }
         }

@@ -38,10 +38,10 @@ namespace KooliProjekt.Services
 
         public async Task Delete(int id)
         {
-            var Organizer = await _context.Events.FindAsync(id);
-            if (Organizer != null)
+            var organizer = await _context.Organizers.FindAsync(id);
+            if (organizer != null)
             {
-                _context.Events.Remove(Organizer);
+                _context.Organizers.Remove(organizer);
                 await _context.SaveChangesAsync();
             }
         }
