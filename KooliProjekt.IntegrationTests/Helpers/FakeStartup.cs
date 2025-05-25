@@ -1,6 +1,7 @@
 ﻿using System;
 using KooliProjekt.Controllers;
 using KooliProjekt.Data;
+using KooliProjekt.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
@@ -35,7 +36,11 @@ namespace KooliProjekt.IntegrationTests.Helpers
             services.AddControllersWithViews()
                     .AddApplicationPart(typeof(HomeController).Assembly);
 
-            //services.AddScoped<IFileClient, LocalFileClient>();
+            services.AddScoped<IClientService, ClientsService>();
+            services.AddScoped<IEventsService, EventsService>();
+            services.AddScoped<IOrganizerService, OrganizerService>();
+            services.AddScoped<IPaymentService, PaymentService>();
+            services.AddScoped<IRegisteringService, RegisteringService>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -67,19 +72,9 @@ namespace KooliProjekt.IntegrationTests.Helpers
                     throw new Exception("LIVE SETTINGS IN TESTS!");
                 }
 
-                //EnsureDatabase(dbContext);
+                dbContext.Database.EnsureDeleted();
+                dbContext.Database.EnsureCreated();
             }
         }
-
-        //private void EnsureDatabase(ApplicationDbContext dbContext)
-        //{
-        //    dbContext.Database.EnsureDeleted();
-        //    dbContext.Database.EnsureCreated();
-
-        //    if (!dbContext.Degustation.Any() || !dbContext.Batch.Any() || !dbContext.BatchIngredient.Any() || !dbContext.Batchlog.Any() || !dbContext.Batch.Any() || !dbContext.User.Any())
-        //    {
-        //        SeedData.Initialize(dbContext);
-        //    }
-        //}
     }
 }

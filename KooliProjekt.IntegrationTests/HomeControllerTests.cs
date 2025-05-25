@@ -4,6 +4,7 @@ using Xunit;
 
 namespace KooliProjekt.IntegrationTests
 {
+    [Collection("Sequential")]
     public class HomeControllerTests : TestBase
     {
         [Theory]

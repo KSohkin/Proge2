@@ -13,118 +13,118 @@ using Xunit;
 namespace KooliProjekt.IntegrationTests
 {
     [Collection("Sequential")]
-    public class RegisteringControllerTests : TestBase
+    public class OrganizerControllerTests : TestBase
     {
-        private readonly HttpClient _registering;
+        private readonly HttpClient _organizer;
         private readonly ApplicationDbContext _context;
 
-        public RegisteringControllerTests()
+        public OrganizerControllerTests()
         {
             var options = new WebApplicationFactoryClientOptions
             {
                 AllowAutoRedirect = false
             };
-            _registering = Factory.CreateClient(options);
+            _organizer = Factory.CreateClient(options);
             _context = (ApplicationDbContext)Factory.Services.GetService(typeof(ApplicationDbContext));
         }
 
         [Fact]
         public async Task Index_should_return_correct_response()
         {
-            using var response = await _registering.GetAsync("/Registerings");
+            // Act
+            using var response = await _organizer.GetAsync("/Organizers");
+
+            // Assert
             response.EnsureSuccessStatusCode();
         }
 
         [Fact]
         public async Task Details_should_return_notfound_when_list_was_not_found()
         {
-            using var response = await _registering.GetAsync("/Registerings/Details/100");
+            using var response = await _organizer.GetAsync("/Organizers/Details/99999");
             Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
         }
 
         [Fact]
         public async Task Details_should_return_notfound_when_id_is_missing()
         {
-            using var response = await _registering.GetAsync("/Registerings/Details/");
+            using var response = await _organizer.GetAsync("/Organizers/Details/");
             Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
         }
 
         [Fact]
         public async Task Details_should_return_ok_when_list_was_found()
         {
-            var list = new Registering
-            {
-                Date = DateTime.Now,
-                Klient_Id = 22,
-                Payment_Id = "22",
-                Event_Id = 21
-            };
-
-            _context.Registerings.Add(list);
+            // Arrange
+            var list = new Organizer { Name = "Test Name", Description = "Test Desc" };
+            _context.Organizers.Add(list);
             await _context.SaveChangesAsync();
 
-            using var response = await _registering.GetAsync("/Registerings/Details/" + list.Id);
+            // Act
+            using var response = await _organizer.GetAsync($"/Organizers/Details/{list.Id}");
+
+            // Assert
             response.EnsureSuccessStatusCode();
         }
 
         [Theory]
-        [InlineData("/Registerings/Details")]
-        [InlineData("/Registerings/Details/100")]
-        [InlineData("/Registerings/Delete")]
-        [InlineData("/Registerings/Delete/100")]
-        [InlineData("/Registerings/Edit")]
-        [InlineData("/Registerings/Edit/100")]
+        [InlineData("/Organizers/Details")]
+        [InlineData("/Organizers/Details/99999")]
+        [InlineData("/Organizers/Delete")]
+        [InlineData("/Organizers/Delete/99999")]
+        [InlineData("/Organizers/Edit")]
+        [InlineData("/Organizers/Edit/99999")]
         public async Task Should_return_notfound(string url)
         {
-            using var response = await _registering.GetAsync(url);
+            using var response = await _organizer.GetAsync(url);
             Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
         }
 
         [Fact]
         public async Task Create_should_save_new_list()
         {
+            // Arrange
             var formValues = new Dictionary<string, string>
             {
-                { "Date", DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss") },
-                { "Klient_Id", "12" },
-                { "Payment_Id", "13" },
-                { "Event_Id", "13" },
+                { "Name", "Test Organizer" },
+                { "Description", "This is a test" }
             };
 
-            _context.Registerings.RemoveRange(_context.Registerings.ToList());
+            _context.Organizers.RemoveRange(_context.Organizers.ToList());
             await _context.SaveChangesAsync();
 
             using var content = new FormUrlEncodedContent(formValues);
-            using var response = await _registering.PostAsync("/Registerings/Create", content);
 
+            // Act
+            using var response = await _organizer.PostAsync("/Organizers/Create", content);
+
+            // Assert
             Assert.Equal(HttpStatusCode.Redirect, response.StatusCode);
 
-            var savedRegistering = await _context.Registerings.FirstOrDefaultAsync();
-            Assert.NotNull(savedRegistering);
-            Assert.Equal("13", savedRegistering.Payment_Id);
+            var savedOrganizer = await _context.Organizers.FirstOrDefaultAsync();
+            Assert.NotNull(savedOrganizer);
+            Assert.Equal("Test Organizer", savedOrganizer.Name);
         }
 
         [Fact]
         public async Task Create_should_not_save_invalid_new_list()
         {
+            // Arrange
             var formValues = new Dictionary<string, string>
             {
-                { "Klient_Id", "" },
-                { "Id", "" },
-                { "Payment_Id", "" },
-                { "Date", "" },
-                { "Event_Id", "" },
+                { "Name", "" },
+                { "Description", "" }
             };
 
             using var content = new FormUrlEncodedContent(formValues);
-            using var response = await _registering.PostAsync("/Registerings/Create", content);
 
-            Assert.True(
-                response.StatusCode == HttpStatusCode.OK ||
-                response.StatusCode == HttpStatusCode.BadRequest
-            );
+            // Act
+            using var response = await _organizer.PostAsync("/Organizers/Create", content);
 
-            Assert.Empty(_context.Registerings);
+            // Assert
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode); // Invalid data returns to view
+
+            Assert.Empty(_context.Organizers);
         }
     }
 }

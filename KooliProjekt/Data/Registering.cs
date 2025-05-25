@@ -4,7 +4,6 @@ namespace KooliProjekt.Data
 {
     public class Registering
     {
-        [Required]
         public int Id { get; set; }
         [Required]
         public int Klient_Id { get; set; }
