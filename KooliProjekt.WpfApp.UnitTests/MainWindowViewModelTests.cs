@@ -15,11 +15,13 @@ namespace KooliProjekt.Tests
             // Arrange
             var mockApi = new Mock<IApiClient>();
             var fakeClients = new List<Client>
-            {
-                new Client { Id = 1, Name = "Alice", Email = "alice@test.com", Phonenumber = "123" },
-                new Client { Id = 2, Name = "Bob", Email = "bob@test.com", Phonenumber = "456" }
-            };
-            mockApi.Setup(api => api.List()).ReturnsAsync(fakeClients);
+    {
+        new Client { Id = 1, Name = "Alice", Email = "alice@test.com", Phonenumber = "123" },
+        new Client { Id = 2, Name = "Bob", Email = "bob@test.com", Phonenumber = "456" }
+    };
+
+            mockApi.Setup(api => api.List())
+                   .ReturnsAsync(new Result<List<Client>> { Value = fakeClients });
 
             var vm = new MainWindowViewModel(mockApi.Object);
 
@@ -30,6 +32,7 @@ namespace KooliProjekt.Tests
             Assert.Equal(2, vm.Lists.Count);
             Assert.Equal("Alice", vm.Lists[0].Name);
         }
+
 
         [Fact]
         public async Task SaveCommand_ShouldCallApiClientSave_WhenSelectedItemIsNotNull()

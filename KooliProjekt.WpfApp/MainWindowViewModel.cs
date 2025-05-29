@@ -69,6 +69,7 @@ namespace KooliProjekt.WpfApp
     list => SelectedItem != null
 );
 
+        }
 
         public async Task Load()
         {
