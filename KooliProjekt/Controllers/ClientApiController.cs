@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace KooliProjekt.Controllers
 {
-    [Route("api/Panels")]
+    [Route("api/Clients")]
     [ApiController]
     public class ClientApiController : ControllerBase
     {
