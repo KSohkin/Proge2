@@ -33,54 +33,61 @@ namespace KooliProjekt.WpfApp
             );
 
             SaveCommand = new RelayCommand<Client>(
-                // Execute
-                async list =>
-                {
-                    await _apiClient.Save(SelectedItem);
-                    await Load();
-                },
-                // CanExecute
-                list =>
-                {
-                    return SelectedItem != null;
-                }
-            );
+            async list =>
+            {
+              ErrorMessage = null;
+              var result = await _apiClient.Save(SelectedItem);
+              if (result.HasError)
+             {
+              ErrorMessage = "Viga salvestamisel: " + result.Error;
+              return;
+             }
+             await Load();
+             },
+             list => SelectedItem != null
+             );
+
 
             DeleteCommand = new RelayCommand<Client>(
-                // Execute
-                async list =>
-                {
-                    if(ConfirmDelete != null)
-                    {
-                        var result = ConfirmDelete(SelectedItem);
-                        if(!result)
-                        {
-                            return;
-                        }
-                    }
+    async list =>
+    {
+        ErrorMessage = null;
 
-                    await _apiClient.Delete(SelectedItem.Id);
-                    Lists.Remove(SelectedItem);
-                    SelectedItem = null;
-                },
-                // CanExecute
-                list =>
-                {
-                    return SelectedItem != null;
-                }
-            );
+        if (ConfirmDelete != null && !ConfirmDelete(SelectedItem))
+            return;
+
+        var result = await _apiClient.Delete(SelectedItem.Id);
+        if (result.HasError)
+        {
+            ErrorMessage = "Viga kustutamisel: " + result.Error;
+            return;
         }
+
+        Lists.Remove(SelectedItem);
+        SelectedItem = null;
+    },
+    list => SelectedItem != null
+);
+
 
         public async Task Load()
         {
             Lists.Clear();
+            ErrorMessage = null;
 
-            var lists = await _apiClient.List();
-            foreach(var list in lists)
+            var result = await _apiClient.List();
+            if (result.HasError)
+            {
+                ErrorMessage = "Viga laadimisel: " + result.Error;
+                return;
+            }
+
+            foreach (var list in result.Value)
             {
                 Lists.Add(list);
             }
         }
+
 
         private Client _selectedItem;
         public Client SelectedItem
@@ -95,5 +102,17 @@ namespace KooliProjekt.WpfApp
                 NotifyPropertyChanged();
             }
         }
+        private string _errorMessage;
+        public string ErrorMessage
+        {
+            get => _errorMessage;
+            set
+            {
+                _errorMessage = value;
+                NotifyPropertyChanged();
+            }
+        }
+
     }
+
 }

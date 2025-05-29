@@ -1,9 +1,8 @@
-﻿namespace KooliProjekt.WpfApp.Api
+﻿using KooliProjekt.WpfApp.Api;
+
+public interface IApiClient
 {
-    public interface IApiClient
-    {
-        Task<List<Client>> List();
-        Task Save(Client list);
-        Task Delete(int id);
-    }
+    Task<Result<List<Client>>> List();
+    Task<Result> Save(Client list);
+    Task<Result> Delete(int id);
 }
