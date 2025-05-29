@@ -16,10 +16,10 @@
     <PackageReference Include="xunit.runner.visualstudio" Version="2.5.3" />
 	  <PackageReference Include="Moq" Version="4.18.4" />
   </ItemGroup>
-	
+
 	<ItemGroup>
-    <ProjectReference Include="C:\Users\Kaupi\Downloads\KooliProjekt.WpfApp-AddNew (1)\KooliProjekt.WpfApp\KooliProjekt.WpfApp.csproj" />
-  </ItemGroup>
+		<ProjectReference Include="..\KooliProjekt.WpfApp\KooliProjekt.WpfApp.csproj" />
+	</ItemGroup>
 	
   <ItemGroup>
     <Using Include="Xunit" />
